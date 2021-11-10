@@ -144,7 +144,7 @@ export default function App() {
 
         <Row className='d-flex justify-content-center'>
           <Card style={{ width: "50vw", padding: "3vw", marginTop: "3vh" }}>
-            <Card.Title>Step 5! Get List of Minted Tokens</Card.Title>
+            <Card.Title>Step 3! Get List of Minted Tokens</Card.Title>
             <Card.Body>
               <Card.Header>Enter the Following in Your Terminal</Card.Header>
               <Alert>{`near view example-nft.testnet nft_tokens_for_owner '{"account_id": "'$ID'"}'`}</Alert>
@@ -155,32 +155,7 @@ export default function App() {
         <Row
           className='d-flex justify-content-center'
           style={{ marginTop: "10vh" }}
-        >
-          <Card style={{ width: "=50vw", marginBottom: "10vh" }}>
-            <Card.Title> Step 6! Retrieve Image with ID</Card.Title>
-            <Container>
-              <Row>
-                {" "}
-                <Form.Group className='mb-3' controlId='formBasicEmail'>
-                  <Form.Label>Enter Transaction ID</Form.Label>
-                  <Form.Control ref={idRef} type='' placeholder='Enter ID' />
-                </Form.Group>
-              </Row>
-              <Row className='justify-content-center d-flex'>
-                {" "}
-                <Button
-                  style={{ marginBottom: "3vh", width: "30vw" }}
-                  onClick={getData}
-                >
-                  Get Data
-                </Button>
-              </Row>
-              <Row className='d-flex justify-content-center'>
-                <img style={{ width: "40vw" }} src={getImage} />
-              </Row>
-            </Container>
-          </Card>
-        </Row>
+        ></Row>
       </Container>
     </React.Fragment>
   );
