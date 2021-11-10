@@ -1,6 +1,7 @@
 import "regenerator-runtime/runtime";
 import React, { useState, useEffect, useRef } from "react";
 import { login, logout } from "./utils";
+import { SkynetClient } from "skynet-js";
 
 // style sheets
 import "./global.css";
@@ -19,7 +20,6 @@ import {
   NavDropdown,
   Alert,
 } from "react-bootstrap";
-import Arweave from "arweave";
 
 // Since v1.5.1 you're now able to call the init function for the web version without options. The current URL path will be used by default. This is recommended when running from a gateway.
 
@@ -27,96 +27,68 @@ import ReactMarkdown from "react-markdown";
 import getConfig from "./config";
 const { networkId } = getConfig(process.env.NODE_ENV || "development");
 
+// Entering into the skynet
+
+// Open a Portal to Skynet
+const portal =
+  window.location.hostname === "localhost" ? "https://siasky.net" : undefined;
+
+// Initiate A skynet client
+const client = new SkynetClient(portal);
+console.log(client);
+
 export default function App() {
   // state variables
   const [bufferVal, changeBuffer] = useState([]);
   const [arweaveKey, changeArweaveKey] = useState("");
   const [getImage, changeGetImage] = useState("");
-  const [transacitonID, changeTransactionID] = useState("");
+  const [skyLinkURLVal, changeSkyLinkURLVal] = useState("");
 
   //references
   const idRef = useRef();
 
-  const arweave = Arweave.init({
-    host: "127.0.0.1",
-    port: 1984,
-    protocol: "http",
-  });
-
-  useEffect(() => {
-    arweave.wallets.generate().then((key) => {
-      console.log(key);
-      changeArweaveKey(key);
-      // {
-      //     "kty": "RSA",
-      //     "n": "3WquzP5IVTIsv3XYJjfw5L-t4X34WoWHwOuxb9V8w...",
-      //     "e": ...
-    });
-  }, []);
-
-  const processPic = (event) => {
+  const processPic = async (event) => {
+    // prevent default action of the button
     event.preventDefault();
-    console.log("event capture...");
-    console.log(event);
-    // process file for ipfs
-    console.log(event.target.files);
-    const file = event.target.files[0];
-    const reader = new FileReader();
 
-    reader.readAsArrayBuffer(file);
-    reader.onloadend = () => {
-      changeBuffer(reader.result);
-      console.log(reader.result);
-    };
+    // process file for ipfs
+
+    // retrieve file blob
+    const file = event.target.files[0];
+
+    changeBuffer(new File([file], "test file"));
+
+    // create new instance of a file reader
+    // const reader = new FileReader();
+
+    // read array as buffer
+    // reader.readAsArrayBuffer(file);
+    // reader.onloadend = () => {
+    //   // once buffer has loaded set array in state variable for later use
+    //   changeBuffer(reader.result);
+    //   console.log(reader.result);
+    // };
   };
 
-  const saveToArweave = async () => {
+  const saveToSkynet = async () => {
+    // file data from process pic function
     let data = bufferVal;
-    let transaction = await arweave.createTransaction(
-      { data: data },
-      arweaveKey
-    );
-    transaction.addTag("Content-Type", "image/png");
 
-    await arweave.transactions.sign(transaction, arweaveKey);
+    // upload user file and get a skyfile descriptor
+    const { skylink } = await client.uploadFile(data);
 
-    changeTransactionID(transaction.id);
+    // get skylink URL
+    const skylinkUrl = await client.getSkylinkUrl(skylink);
 
-    console.log("transaction details");
+    // set SkyLink URL to state variable
+    changeSkyLinkURLVal(skylinkUrl);
 
-    console.log("I am logging the transaction id", transaction.id);
-
-    let uploader = await arweave.transactions.getUploader(transaction);
-
-    while (!uploader.isComplete) {
-      await uploader.uploadChunk();
-      console.log(
-        `${uploader.pctComplete}% complete, ${uploader.uploadedChunks}/${uploader.totalChunks}`
-      );
-    }
+    console.log(skylinkUrl);
   };
 
   const getData = async () => {
-    arweave.transactions.getStatus(idRef.current.value).then((res) => {
-      console.log(res);
-      // {
-      //  status: 200,
-      //  confirmed: {
-      //    block_height: 140151,
-      //    block_indep_hash: 'OR1wue3oBSg3XWvH0GBlauAtAjBICVs2F_8YLYQ3aoAR7q6_3fFeuBOw7d-JTEdR',
-      //    number_of_confirmations: 20
-      //  }
-      //}
-    });
-
-    const result = await arweave.transactions.get(idRef.current.value);
-    console.log(result.data);
-
-    const base64String = btoa(
-      String.fromCharCode(...new Uint8Array(result.data))
-    );
-
-    changeGetImage(`data:image/png;base64,${base64String}`);
+    // To use this later in our React app, save the URL to the state.
+    // setFileSkylink(skylinkUrl);
   };
 
   return (
@@ -138,66 +110,33 @@ export default function App() {
       <Container>
         <Row
           className='d-flex justify-content-center'
-          style={{ marginTop: "10vh" }}
-        >
-          {" "}
-          <Card style={{ width: "50vw", padding: "3vw" }}>
-            <Card.Title>Step 1! ArLocal</Card.Title>
-            <Card.Body>
-              First, open up an additonal terminal, one used to run this
-              application the other to start your local Arweave Node. Then go to{" "}
-              <a href={"https://github.com/textury/arlocal"}>ArLocal Github</a>{" "}
-              and set up your local arweave node. You can do this by simply
-              running <br></br>
-              <Alert> npx arlocal</Alert> <br></br> in your additional terminal
-            </Card.Body>
-          </Card>
-        </Row>
-
-        <Row
-          className='d-flex justify-content-center'
           style={{ marginTop: "3vh" }}
         >
           <Card style={{ width: "50vw", padding: "3vw" }}>
-            <Card.Title>Step 2!</Card.Title>
+            <Card.Title>Step 1!</Card.Title>
             <Form.Group controlId='formFile' className='mb-3'>
               <Form.Label>Choose a .png file from your computer</Form.Label>
               <Form.Control onChange={processPic} type='file' />
             </Form.Group>
-            <Button onClick={saveToArweave}>Submit</Button>
+            <Button onClick={saveToSkynet}>Submit</Button>
             <br></br>
-            <Card.Header>Transaction ID</Card.Header>
-            <Alert>{transacitonID}</Alert>
-          </Card>
-        </Row>
-        <Row className='d-flex justify-content-center'>
-          <Card style={{ width: "50vw", padding: "3vw", marginTop: "3vh" }}>
-            <Card.Body>
-              <Card.Title>Step 3! Mine Transaction</Card.Title>
-              <Card.Text>
-                After submitting your .png file visit <br></br>
-                <a href={"http://localhost:1984/mine"}>
-                  http://localhost:1984/mine
-                </a>{" "}
-                to mine your new transaction. Simply click on that link (modify
-                port as needed) and your block should be mined
-              </Card.Text>
-            </Card.Body>
+            <Card.Header>Skynet URL</Card.Header>
+            <Alert>{skyLinkURLVal}</Alert>
           </Card>
         </Row>
 
         <Row className='d-flex justify-content-center'>
           <Card style={{ width: "50vw", padding: "3vw", marginTop: "3vh" }}>
-            <Card.Title>Step 4! Mint NFT</Card.Title>
+            <Card.Title>Step 2! Mint NFT</Card.Title>
             <Card.Body>
               <Card.Header>Enter the Following in Your Terminal</Card.Header>
               <Alert>ID=your-testnet-account-name.testnet</Alert>
               <Alert>TITLE={`<name you want to give your NFT>`}</Alert>
               <Alert>
-                ARWEAVEID={`<The TransactionID given to you above>`}
+                SKYNETURL={`<The TransactionID given to you above>`}
               </Alert>
               <Alert>
-                {`near call example-nft.testnet nft_mint '{"token_id": "'$ARWEAVEID'", "receiver_id": "'$ID'", "token_metadata": { "title": "'$TITLE'", "description": "My NFT media", "copies": 1}}' --accountId $ID --deposit 0.1`}
+                {`near call example-nft.testnet nft_mint '{"token_id": "'$SKYNETURL'", "receiver_id": "'$ID'", "token_metadata": { "title": "'$TITLE'", "description": "My NFT media", "copies": 1}}' --accountId $ID --deposit 0.1`}
               </Alert>{" "}
             </Card.Body>
           </Card>

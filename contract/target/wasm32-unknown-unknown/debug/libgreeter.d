@@ -1,1 +1,1 @@
-/Users/doriankinoocrutcher/Documents/NEAR/arweave/localarweave/arweave_tutorial/contract/target/wasm32-unknown-unknown/debug/libgreeter.rlib: /Users/doriankinoocrutcher/Documents/NEAR/arweave/localarweave/arweave_tutorial/contract/src/lib.rs
+/Users/doriankinoocrutcher/Documents/NEAR/Developer/NEAR-Skynet-Tutorial/contract/target/wasm32-unknown-unknown/debug/libgreeter.rlib: /Users/doriankinoocrutcher/Documents/NEAR/Developer/NEAR-Skynet-Tutorial/contract/src/lib.rs

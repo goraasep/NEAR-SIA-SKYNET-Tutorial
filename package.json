@@ -32,7 +32,6 @@
     "shelljs": "~0.8.4"
   },
   "dependencies": {
-    "arweave": "^1.10.18",
     "bootstrap": "^5.1.3",
     "near-api-js": "~0.43.1",
     "react": "~17.0.1",
@@ -42,7 +41,8 @@
     "react-markdown": "^7.1.0",
     "react-syntax-highlighter": "^9.0.1",
     "refractor": "^2.10.1",
-    "regenerator-runtime": "~0.13.5"
+    "regenerator-runtime": "~0.13.5",
+    "skynet-js": "^4.0.19-beta"
   },
   "resolutions": {
     "@babel/preset-env": "7.13.8"
