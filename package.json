@@ -54,7 +54,7 @@
     },
     "setupFiles": [
       "<rootDir>/src/jest.init.js"
-    ],
+    ], 
     "testEnvironment": "near-cli/test_environment",
     "testPathIgnorePatterns": [
       "<rootDir>/contract/",

@@ -132,9 +132,7 @@ export default function App() {
               <Card.Header>Enter the Following in Your Terminal</Card.Header>
               <Alert>ID=your-testnet-account-name.testnet</Alert>
               <Alert>TITLE={`<name you want to give your NFT>`}</Alert>
-              <Alert>
-                SKYNETURL={`<The TransactionID given to you above>`}
-              </Alert>
+              <Alert>SKYNETURL={`<The Skynet URL given to you above>`}</Alert>
               <Alert>
                 {`near call example-nft.testnet nft_mint '{"token_id": "'$SKYNETURL'", "receiver_id": "'$ID'", "token_metadata": { "title": "'$TITLE'", "description": "My NFT media", "copies": 1}}' --accountId $ID --deposit 0.1`}
               </Alert>{" "}
